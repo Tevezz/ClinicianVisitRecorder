@@ -1,0 +1,32 @@
+# Gradle
+*.iml
+.gradle
+**/build/
+
+# Android
+local.properties
+/captures
+.externalNativeBuild
+.cxx
+
+# IntelliJ / Android Studio
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/.idea/appInsightsSettings.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/migrations.xml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Security — never commit signing keys
+*.keystore
+*.jks
+
+# Profiling
+*.hprof
