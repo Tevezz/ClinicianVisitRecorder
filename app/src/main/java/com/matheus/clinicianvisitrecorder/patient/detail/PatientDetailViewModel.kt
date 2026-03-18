@@ -47,7 +47,6 @@ class PatientDetailViewModel @AssistedInject constructor(
 
     fun handleIntent(intent: PatientDetailIntent) {
         when (intent) {
-            is PatientDetailIntent.LoadPatient -> loadPatient()
             is PatientDetailIntent.StartVisit -> startRecording()
             is PatientDetailIntent.StopVisit -> stopRecording()
         }

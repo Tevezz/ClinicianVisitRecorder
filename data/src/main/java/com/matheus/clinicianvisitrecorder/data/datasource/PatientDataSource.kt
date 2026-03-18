@@ -2,7 +2,7 @@ package com.matheus.clinicianvisitrecorder.data.datasource
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.matheus.clinicianvisitrecorder.data.remote.RickAndMortyApi
+import com.matheus.clinicianvisitrecorder.data.datasource.RickAndMortyApi
 import com.matheus.clinicianvisitrecorder.domain.model.Patient
 import toPatient
 

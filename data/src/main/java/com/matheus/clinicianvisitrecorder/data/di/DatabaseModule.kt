@@ -3,7 +3,7 @@ package com.matheus.clinicianvisitrecorder.data.di
 import android.content.Context
 import androidx.room.Room
 import com.matheus.clinicianvisitrecorder.data.database.AppDatabase
-import com.matheus.clinicianvisitrecorder.data.datasource.VisitDao
+import com.matheus.clinicianvisitrecorder.data.model.VisitDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -4,7 +4,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.matheus.clinicianvisitrecorder.data.datasource.PatientDataSource
-import com.matheus.clinicianvisitrecorder.data.remote.RickAndMortyApi
+import com.matheus.clinicianvisitrecorder.data.datasource.RickAndMortyApi
 import com.matheus.clinicianvisitrecorder.domain.model.Patient
 import com.matheus.clinicianvisitrecorder.domain.repository.PatientRepository
 import kotlinx.coroutines.Dispatchers

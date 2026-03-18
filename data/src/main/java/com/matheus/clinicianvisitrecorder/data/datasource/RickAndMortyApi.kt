@@ -1,4 +1,4 @@
-package com.matheus.clinicianvisitrecorder.data.remote
+package com.matheus.clinicianvisitrecorder.data.datasource
 
 import CharacterDto
 import CharacterResponseDto

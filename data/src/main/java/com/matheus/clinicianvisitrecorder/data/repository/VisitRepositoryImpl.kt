@@ -1,6 +1,6 @@
 package com.matheus.clinicianvisitrecorder.data.repository
 
-import com.matheus.clinicianvisitrecorder.data.datasource.VisitDao
+import com.matheus.clinicianvisitrecorder.data.model.VisitDao
 import com.matheus.clinicianvisitrecorder.data.model.VisitEntity
 import com.matheus.clinicianvisitrecorder.data.model.toDomain
 import com.matheus.clinicianvisitrecorder.domain.model.Visit
