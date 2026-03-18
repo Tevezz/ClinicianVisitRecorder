@@ -3,6 +3,12 @@ package com.matheus.clinicianvisitrecorder.patient.detail
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,21 +42,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -153,14 +152,6 @@ fun ActiveVisitContent(
     onStopClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val listState = rememberLazyListState()
-
-    LaunchedEffect(state.transcript) {
-        if (state.transcript.isNotEmpty()) {
-            listState.animateScrollToItem(index = 1)
-        }
-    }
-
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -170,35 +161,12 @@ fun ActiveVisitContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Card(
+        TranscriptCard(
+            transcript = state.transcript,
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF161B22)),
-            border = BorderStroke(1.dp, Color(0xFF30363D))
-        ) {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                item {
-                    Text(
-                        text = "LIVE TRANSCRIPT",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF9F7AEA) // Purple accent
-                    )
-                }
-                item {
-                    Text(
-                        text = state.transcript.ifEmpty { "Listening for audio..." },
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = if (state.transcript.isEmpty()) Color.Gray else Color.White,
-                        lineHeight = 28.sp
-                    )
-                }
-            }
-        }
+                .weight(1f)
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -357,26 +325,43 @@ fun WaveformPlaceholder() {
 }
 
 @Composable
-fun TranscriptCard(transcript: String) {
+fun TranscriptCard(
+    transcript: String,
+    modifier: Modifier = Modifier
+) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(transcript) {
+        if (transcript.isNotEmpty()) {
+            listState.animateScrollToItem(index = 1)
+        }
+    }
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF0D1117)),
-        shape = RoundedCornerShape(12.dp),
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF161B22)),
         border = BorderStroke(1.dp, Color(0xFF30363D))
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "Live Transcript",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.Gray
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = if (transcript.isEmpty()) "\"...waiting for speech...\"" else "\"$transcript\"",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.White,
-                fontStyle = FontStyle.Italic
-            )
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            item {
+                Text(
+                    text = "LIVE TRANSCRIPT",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color(0xFF9F7AEA)
+                )
+            }
+            item {
+                Text(
+                    text = transcript.ifEmpty { "Listening for audio..." },
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (transcript.isEmpty()) Color.Gray else Color.White,
+                    lineHeight = 28.sp
+                )
+            }
         }
     }
 }
