@@ -50,12 +50,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.matheus.clinicianvisitrecorder.R
 import com.matheus.clinicianvisitrecorder.domain.model.Patient
 import com.matheus.clinicianvisitrecorder.domain.model.Visit
 import java.time.Instant
@@ -125,12 +127,12 @@ fun IdleVisitContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9F7AEA)),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             shape = RoundedCornerShape(12.dp)
         ) {
             Icon(Icons.Default.Mic, contentDescription = null)
             Spacer(Modifier.width(8.dp))
-            Text("Start New Visit", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.start_new_visit), style = MaterialTheme.typography.titleMedium)
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -178,7 +180,7 @@ fun ActiveVisitContent(
             Text(
                 text = state.recordingDuration, // e.g., "04:20"
                 style = MaterialTheme.typography.headlineMedium,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onSurface
             )
             WaveformPlaceholder()
         }
@@ -190,10 +192,10 @@ fun ActiveVisitContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444)),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("End Visit", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.end_visit), style = MaterialTheme.typography.titleMedium)
         }
     }
 }
@@ -205,9 +207,9 @@ fun PatientHeaderCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF161B22)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(1.dp, Color(0xFF30363D))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -229,7 +231,7 @@ fun PatientHeaderCard(
                 Text(
                     text = patient?.name ?: "Loading...",
                     style = MaterialTheme.typography.titleLarge,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
 
@@ -238,7 +240,7 @@ fun PatientHeaderCard(
                 val statusColor = when (patient?.condition?.lowercase()) {
                     "alive" -> Color(0xFF4ADE80)
                     "dead" -> Color(0xFFEF4444)
-                    else -> Color.Gray
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant
                 }
                 Text(
                     text = patient?.condition ?: "",
@@ -250,7 +252,7 @@ fun PatientHeaderCard(
                 if (patient?.species?.isNotEmpty() == true) {
                     Text(
                         text = patient.species,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -258,7 +260,7 @@ fun PatientHeaderCard(
                 if (patient?.location?.isNotEmpty() == true) {
                     Text(
                         text = patient.location,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -266,13 +268,13 @@ fun PatientHeaderCard(
 
             if (isActive) {
                 Surface(
-                    color = Color(0xFF238636).copy(alpha = 0.2f),
+                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
                     shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(1.dp, Color(0xFF238636))
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary)
                 ) {
                     Text(
-                        text = "Active",
-                        color = Color(0xFF4ADE80),
+                        text = stringResource(R.string.status_active),
+                        color = MaterialTheme.colorScheme.onSecondary,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelMedium
                     )
@@ -284,7 +286,7 @@ fun PatientHeaderCard(
 
 @Composable
 fun WaveformPlaceholder() {
-    val purpleColor = Color(0xFF9F7AEA)
+    val purpleColor = MaterialTheme.colorScheme.primary
     val infiniteTransition = rememberInfiniteTransition(label = "waveform")
 
     val initialHeights = listOf(0.3f, 0.7f, 0.5f, 0.9f, 0.2f, 0.8f, 0.4f, 1.0f, 0.5f, 0.6f, 0.3f, 0.9f, 0.6f, 0.4f, 0.7f)
@@ -339,8 +341,8 @@ fun TranscriptCard(
 
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF161B22)),
-        border = BorderStroke(1.dp, Color(0xFF30363D))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         LazyColumn(
             state = listState,
@@ -349,16 +351,16 @@ fun TranscriptCard(
         ) {
             item {
                 Text(
-                    text = "LIVE TRANSCRIPT",
+                    text = stringResource(R.string.live_transcript),
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF9F7AEA)
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
             item {
                 Text(
-                    text = transcript.ifEmpty { "Listening for audio..." },
+                    text = transcript.ifEmpty { stringResource(R.string.listening_for_audio) },
                     style = MaterialTheme.typography.bodyLarge,
-                    color = if (transcript.isEmpty()) Color.Gray else Color.White,
+                    color = if (transcript.isEmpty()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
                     lineHeight = 28.sp
                 )
             }
@@ -379,9 +381,9 @@ fun VisitHistorySection(
     ) {
         item {
             Text(
-                text = "Previous Visits",
+                text = stringResource(R.string.previous_visits),
                 style = MaterialTheme.typography.titleMedium,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(vertical = 12.dp)
             )
         }
@@ -395,8 +397,8 @@ fun VisitHistorySection(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No previous recordings found.",
-                        color = Color.Gray,
+                        text = stringResource(R.string.no_previous_recordings),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -416,8 +418,8 @@ fun VisitHistorySection(
 fun VisitItem(visit: Visit, onPlayClick: (String) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF161B22)),
-        border = BorderStroke(1.dp, Color(0xFF30363D))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -426,7 +428,7 @@ fun VisitItem(visit: Visit, onPlayClick: (String) -> Unit) {
             Icon(
                 imageVector = Icons.Default.PlayCircle,
                 contentDescription = "Play",
-                tint = Color(0xFF9F7AEA),
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .size(40.dp)
                     .clickable { onPlayClick(visit.filePath) }
@@ -436,13 +438,13 @@ fun VisitItem(visit: Visit, onPlayClick: (String) -> Unit) {
 
             Column {
                 Text(
-                    text = "Visit on ${formatTimestamp(visit.timestamp)}",
-                    color = Color.White,
+                    text = stringResource(R.string.visit_on, formatTimestamp(visit.timestamp)),
+                    color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = "Duration: ${visit.duration}",
-                    color = Color.Gray,
+                    text = stringResource(R.string.duration_label, visit.duration),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall
                 )
             }

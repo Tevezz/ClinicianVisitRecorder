@@ -18,8 +18,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.matheus.clinicianvisitrecorder.R
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
@@ -35,7 +37,7 @@ fun PatientListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Patients", color = MaterialTheme.colorScheme.onBackground) },
+                title = { Text(stringResource(R.string.my_patients), color = MaterialTheme.colorScheme.onBackground) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },

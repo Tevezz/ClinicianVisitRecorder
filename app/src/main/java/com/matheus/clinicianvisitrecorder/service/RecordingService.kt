@@ -9,6 +9,7 @@ import android.media.MediaRecorder
 import android.os.Environment
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import com.matheus.clinicianvisitrecorder.R
 import com.matheus.clinicianvisitrecorder.domain.model.Visit
 import com.matheus.clinicianvisitrecorder.domain.repository.VisitRepository
 import dagger.hilt.android.AndroidEntryPoint
@@ -56,8 +57,8 @@ class RecordingService : Service() {
         outputFile = File(getExternalFilesDir(Environment.DIRECTORY_MUSIC), fileName)
 
         val notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Visit Recording Active")
-            .setContentText("Recording encounter for Patient $patientId")
+            .setContentTitle(getString(R.string.recording_notification_title))
+            .setContentText(getString(R.string.recording_notification_text, patientId))
             .setSmallIcon(android.R.drawable.ic_btn_speak_now) // Use a system icon for now
             .setOngoing(true)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
@@ -128,10 +129,10 @@ class RecordingService : Service() {
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
             channelId,
-            "Clinical Recordings",
+            getString(R.string.recording_channel_name),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = "Used for ongoing medical visit recordings"
+            description = getString(R.string.recording_channel_description)
         }
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(channel)
