@@ -36,6 +36,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -310,6 +316,25 @@ fun PatientHeaderCard(
 
 @Composable
 fun WaveformPlaceholder() {
+    val purpleColor = Color(0xFF9F7AEA)
+    val infiniteTransition = rememberInfiniteTransition(label = "waveform")
+
+    val initialHeights = listOf(0.3f, 0.7f, 0.5f, 0.9f, 0.2f, 0.8f, 0.4f, 1.0f, 0.5f, 0.6f, 0.3f, 0.9f, 0.6f, 0.4f, 0.7f)
+    val targetHeights  = listOf(0.9f, 0.3f, 1.0f, 0.4f, 0.8f, 0.2f, 0.9f, 0.3f, 1.0f, 0.2f, 0.8f, 0.4f, 0.9f, 0.8f, 0.3f)
+    val durations      = listOf( 420,  600,  350,  500,  460,  650,  380,  520,  480,  600,  430,  560,  490,  580,  370)
+
+    val animatedHeights = initialHeights.indices.map { i ->
+        infiniteTransition.animateFloat(
+            initialValue = initialHeights[i],
+            targetValue = targetHeights[i],
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = durations[i], easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "bar_$i"
+        )
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -317,20 +342,13 @@ fun WaveformPlaceholder() {
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val barCount = 15
-        val purpleColor = Color(0xFF9F7AEA)
-
-        repeat(barCount) { index ->
-            // Simulate random heights for a "live" look
-            val heightPercent = when (index % 5) {
-                0 -> 0.4f; 1 -> 0.8f; 2 -> 1.0f; 3 -> 0.7f; else -> 0.5f
-            }
-
+        animatedHeights.forEach { heightAnim ->
+            val h by heightAnim
             Box(
                 modifier = Modifier
                     .padding(horizontal = 3.dp)
                     .width(6.dp)
-                    .fillMaxHeight(heightPercent)
+                    .fillMaxHeight(h)
                     .clip(RoundedCornerShape(3.dp))
                     .background(purpleColor)
             )
