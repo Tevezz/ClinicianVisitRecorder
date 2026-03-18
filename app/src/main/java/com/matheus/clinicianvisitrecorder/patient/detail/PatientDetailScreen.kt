@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
@@ -36,6 +36,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.matheus.clinicianvisitrecorder.domain.model.Patient
@@ -78,7 +80,12 @@ fun PatientDetailScreen(
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         when (state.visitStatus) {
-            VisitStatus.Active -> ActiveVisitContent(state, viewModel, Modifier.padding(padding))
+            VisitStatus.Active -> ActiveVisitContent(
+                state = state,
+                modifier = Modifier.padding(padding),
+                onStopClick = { viewModel.handleIntent(PatientDetailIntent.StopVisit) }
+            )
+
             else -> IdleVisitContent(
                 state = state,
                 modifier = Modifier.padding(padding),
@@ -134,84 +141,90 @@ fun IdleVisitContent(
 @Composable
 fun ActiveVisitContent(
     state: PatientDetailUiState,
-    viewModel: PatientDetailViewModel,
+    onStopClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val listState = rememberLazyListState()
+
+    // AUTO-SCROLL LOGIC
+    // Whenever the transcript text changes, scroll to the last item
+    LaunchedEffect(state.transcript) {
+        if (state.transcript.isNotEmpty()) {
+            // Index 1 is our transcript text block
+            listState.animateScrollToItem(index = 1)
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-
+        // Patient Info Header
         PatientHeaderCard(state.patient, isActive = true)
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
+        // TRANSCRIPT DISPLAY AREA
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(12.dp),
+                .weight(1f), // Takes up all remaining space
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF161B22)),
             border = BorderStroke(1.dp, Color(0xFF30363D))
         ) {
-            Column(
+            LazyColumn(
+                state = listState,
                 modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(
-                        modifier = Modifier.size(8.dp),
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.error
-                    ) {}
-                    Spacer(modifier = Modifier.width(8.dp))
+                item {
                     Text(
-                        "REC",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Bold
+                        text = "LIVE TRANSCRIPT",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color(0xFF9F7AEA) // Purple accent
                     )
                 }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                WaveformPlaceholder()
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Text(
-                    text = state.recordingDuration,
-                    style = MaterialTheme.typography.displayMedium,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Text(
-                    "Recording in progress...",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
+                item {
+                    Text(
+                        text = state.transcript.ifEmpty { "Listening for audio..." },
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if (state.transcript.isEmpty()) Color.Gray else Color.White,
+                        lineHeight = 28.sp
+                    )
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        TranscriptCard(transcript = state.transcript)
+        // Timer & Visualizer Section
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = state.recordingDuration, // e.g., "04:20"
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color.White
+            )
+            // Your Waveform view goes here
+            WaveformPlaceholder()
+        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
+        // STOP BUTTON
         Button(
-            onClick = { viewModel.handleIntent(PatientDetailIntent.StopVisit) },
+            onClick = onStopClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444)),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Stop Recording", color = Color.White)
+            Text("End Visit", style = MaterialTheme.typography.titleMedium)
         }
     }
 }
