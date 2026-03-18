@@ -65,7 +65,7 @@ class RecordingService : Service() {
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle(getString(R.string.recording_notification_title))
             .setContentText(getString(R.string.recording_notification_text, patientId))
-            .setSmallIcon(android.R.drawable.ic_btn_speak_now) // Use a system icon for now
+            .setSmallIcon(android.R.drawable.ic_btn_speak_now)
             .setOngoing(true)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .build()

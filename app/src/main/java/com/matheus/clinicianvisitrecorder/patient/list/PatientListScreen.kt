@@ -16,15 +16,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.matheus.clinicianvisitrecorder.R
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.matheus.clinicianvisitrecorder.R
+import com.matheus.clinicianvisitrecorder.util.ObserveAsEvents
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,12 +35,24 @@ fun PatientListScreen(
     onNavigateDetail: (String) -> Unit,
     viewModel: PatientListViewModel = hiltViewModel()
 ) {
-    val patients = viewModel.pagingData.collectAsLazyPagingItems()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val patients = uiState.pagingData.collectAsLazyPagingItems()
+
+    ObserveAsEvents(viewModel.events) {
+        when (it) {
+            is PatientListEvent.NavigateToDetail -> onNavigateDetail(it.patientId)
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.my_patients), color = MaterialTheme.colorScheme.onBackground) },
+                title = {
+                    Text(
+                        stringResource(R.string.my_patients),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },
@@ -67,7 +82,7 @@ fun PatientListScreen(
                         val patient = patients[index]
                         if (patient != null) {
                             PatientCard(patient = patient) {
-                                onNavigateDetail(patient.id)
+                                viewModel.handleIntent(PatientListIntent.SelectPatient(patient.id))
                             }
                         }
                     }
