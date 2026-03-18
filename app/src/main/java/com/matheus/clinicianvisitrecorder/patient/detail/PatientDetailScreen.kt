@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -55,7 +56,9 @@ import java.util.Locale
 @Composable
 fun PatientDetailScreen(
     patientId: String,
-    viewModel: PatientDetailViewModel = hiltViewModel<PatientDetailViewModel, PatientDetailViewModel.Factory> { factory ->
+    viewModel: PatientDetailViewModel = hiltViewModel<PatientDetailViewModel, PatientDetailViewModel.Factory>(
+        key = patientId
+    ) { factory ->
         factory.create(patientId)
     }
 ) {
@@ -324,23 +327,43 @@ fun TranscriptCard(transcript: String) {
 @Composable
 fun VisitHistorySection(
     visits: List<Visit>,
-    onPlayClick: (String) -> Unit
+    onPlayClick: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Text(
-        text = "Previous Visits",
-        style = MaterialTheme.typography.titleMedium,
-        color = Color.White,
-        modifier = Modifier.padding(vertical = 12.dp)
-    )
+    LazyColumn(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(bottom = 16.dp)
+    ) {
+        item {
+            Text(
+                text = "Previous Visits",
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White,
+                modifier = Modifier.padding(vertical = 12.dp)
+            )
+        }
 
-    if (visits.isEmpty()) {
-        Text("No previous recordings found.", color = Color.Gray)
-    } else {
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            items(visits) { visit ->
+        if (visits.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No previous recordings found.",
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        } else {
+            items(
+                items = visits,
+                key = { it.id }
+            ) { visit ->
                 VisitItem(visit, onPlayClick)
             }
         }
