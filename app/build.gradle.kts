@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -18,6 +20,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        compose = true
     }
 
     buildTypes {
@@ -43,6 +49,18 @@ dependencies {
     implementation(libs.material)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
