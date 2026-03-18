@@ -59,7 +59,7 @@ fun PatientDetailScreen(
         if (isGranted) {
             viewModel.handleIntent(PatientDetailIntent.StartVisit)
         } else {
-            // TODO Handle denial Show a "Why we need this" snackbar
+            // TODO: handle permission denial
         }
     }
 
@@ -79,12 +79,10 @@ fun PatientDetailScreen(
 fun IdleVisitContent(state: PatientDetailUiState, modifier: Modifier = Modifier, onStartClick: () -> Unit) {
     Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
 
-        // Use the existing Header Card from the screenshot
         PatientHeaderCard(state.patient, isActive = false)
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // State 1 Main Card: Preparation
         Card(
             modifier = Modifier.fillMaxWidth().weight(1f),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -96,7 +94,6 @@ fun IdleVisitContent(state: PatientDetailUiState, modifier: Modifier = Modifier,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // A subtle icon indicating readiness
                 Icon(
                     imageVector = Icons.Default.MicNone,
                     contentDescription = null,
@@ -124,7 +121,6 @@ fun IdleVisitContent(state: PatientDetailUiState, modifier: Modifier = Modifier,
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // State 1 Action: The Start Button
         Button(
             onClick = onStartClick,
             modifier = Modifier.fillMaxWidth().height(56.dp),
@@ -144,12 +140,10 @@ fun IdleVisitContent(state: PatientDetailUiState, modifier: Modifier = Modifier,
 fun ActiveVisitContent(state: PatientDetailUiState, viewModel: PatientDetailViewModel, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
 
-        // State 2: Header Card showing "Active" pill (Screenshot Top)
         PatientHeaderCard(state.patient, isActive = true)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // State 2 Main Card: The Waveform (Screenshot Middle)
         Card(
             modifier = Modifier.fillMaxWidth().weight(1f),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -160,7 +154,6 @@ fun ActiveVisitContent(state: PatientDetailUiState, viewModel: PatientDetailView
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Recording Indicator: "● REC"
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Surface(modifier = Modifier.size(8.dp), shape = CircleShape, color = MaterialTheme.colorScheme.error) {}
                     Spacer(modifier = Modifier.width(8.dp))
@@ -169,12 +162,10 @@ fun ActiveVisitContent(state: PatientDetailUiState, viewModel: PatientDetailView
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Placeholder for Waveform component (We can animate this in KMP)
                 WaveformPlaceholder()
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // The Duration Timer (Screenshot "16:39")
                 Text(
                     text = state.recordingDuration,
                     style = MaterialTheme.typography.displayMedium,
@@ -190,12 +181,10 @@ fun ActiveVisitContent(state: PatientDetailUiState, viewModel: PatientDetailView
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // State 2 Transcript Card (Screenshot Bottom)
         TranscriptCard(transcript = state.transcript)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Stop button (Senior design choice: Make it standard height, red)
         Button(
             onClick = { viewModel.handleIntent(PatientDetailIntent.StopVisit) },
             modifier = Modifier.fillMaxWidth().height(56.dp),

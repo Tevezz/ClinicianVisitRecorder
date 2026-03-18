@@ -27,10 +27,7 @@ class PatientListViewModel @Inject constructor(
                 _state.update { it.copy(isRefreshing = true) }
             }
 
-            is PatientListIntent.OnPatientClick -> {
-                // Navigation logic usually happens in the Composable
-                // via a callback to the Activity/NavController
-            }
+            is PatientListIntent.OnPatientClick -> Unit
         }
     }
 }
