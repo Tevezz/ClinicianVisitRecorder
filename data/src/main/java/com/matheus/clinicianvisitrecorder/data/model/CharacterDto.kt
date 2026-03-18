@@ -1,15 +1,12 @@
 package com.matheus.clinicianvisitrecorder.data.model
 
 import com.matheus.clinicianvisitrecorder.domain.model.Patient
-import kotlinx.serialization.Serializable
 
-@Serializable
 internal data class CharacterResponseDto(
     val info: InfoDto,
     val results: List<CharacterDto>
 )
 
-@Serializable
 internal data class InfoDto(
     val count: Int,
     val pages: Int,
@@ -17,13 +14,11 @@ internal data class InfoDto(
     val prev: String?
 )
 
-@Serializable
 internal data class LocationDto(
     val name: String,
     val url: String
 )
 
-@Serializable
 internal data class CharacterDto(
     val id: Int,
     val name: String,

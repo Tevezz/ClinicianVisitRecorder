@@ -80,7 +80,7 @@ class PatientDetailViewModel @AssistedInject constructor(
                 start()
             }
         } catch (e: Exception) {
-            // Handle file not found or corrupted
+
         }
     }
 

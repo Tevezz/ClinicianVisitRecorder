@@ -55,7 +55,6 @@ class RecordingService : Service() {
         val fileName = "visit_${patientId}_${System.currentTimeMillis()}.mp3"
         outputFile = File(getExternalFilesDir(Environment.DIRECTORY_MUSIC), fileName)
 
-        // SmallIcon is MANDATORY for foreground services
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("Visit Recording Active")
             .setContentText("Recording encounter for Patient $patientId")
@@ -77,7 +76,7 @@ class RecordingService : Service() {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            stopSelf() // Fail fast if hardware mic is unavailable
+            stopSelf()
         }
     }
 
@@ -90,7 +89,7 @@ class RecordingService : Service() {
             try {
                 stop()
             } catch (e: IllegalStateException) {
-                // Occurs if stop() is called before start() completes
+
             } finally {
                 release()
             }
@@ -110,7 +109,6 @@ class RecordingService : Service() {
             }
 
             withContext(Dispatchers.Main) {
-                // Reset internal state
                 startTime = 0L
                 currentPatientId = null
                 stopForeground(STOP_FOREGROUND_REMOVE)

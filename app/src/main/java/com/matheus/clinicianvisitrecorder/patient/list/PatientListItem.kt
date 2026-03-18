@@ -82,7 +82,6 @@ fun PatientCard(
                 )
             }
 
-            // A small chevron to indicate it's clickable
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
