@@ -146,11 +146,8 @@ fun ActiveVisitContent(
 ) {
     val listState = rememberLazyListState()
 
-    // AUTO-SCROLL LOGIC
-    // Whenever the transcript text changes, scroll to the last item
     LaunchedEffect(state.transcript) {
         if (state.transcript.isNotEmpty()) {
-            // Index 1 is our transcript text block
             listState.animateScrollToItem(index = 1)
         }
     }
@@ -160,16 +157,14 @@ fun ActiveVisitContent(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Patient Info Header
         PatientHeaderCard(state.patient, isActive = true)
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // TRANSCRIPT DISPLAY AREA
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f), // Takes up all remaining space
+                .weight(1f),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF161B22)),
             border = BorderStroke(1.dp, Color(0xFF30363D))
         ) {
@@ -198,7 +193,6 @@ fun ActiveVisitContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Timer & Visualizer Section
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -209,13 +203,11 @@ fun ActiveVisitContent(
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color.White
             )
-            // Your Waveform view goes here
             WaveformPlaceholder()
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // STOP BUTTON
         Button(
             onClick = onStopClick,
             modifier = Modifier

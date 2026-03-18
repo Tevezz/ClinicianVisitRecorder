@@ -6,7 +6,6 @@ import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.media.MediaRecorder
-import android.os.Build
 import android.os.Environment
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
@@ -44,6 +43,7 @@ class RecordingService : Service() {
                 startTime = System.currentTimeMillis()
                 startRecording(id)
             }
+
             "ACTION_STOP" -> stopRecording()
         }
         return START_STICKY
@@ -67,11 +67,7 @@ class RecordingService : Service() {
         startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
 
         try {
-            mediaRecorder = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                MediaRecorder(this)
-            } else {
-                MediaRecorder()
-            }).apply {
+            mediaRecorder = (MediaRecorder(this)).apply {
                 setAudioSource(MediaRecorder.AudioSource.MIC)
                 setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
                 setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
@@ -132,17 +128,15 @@ class RecordingService : Service() {
     }
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "Clinical Recordings",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "Used for ongoing medical visit recordings"
-            }
-            val manager = getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(channel)
+        val channel = NotificationChannel(
+            channelId,
+            "Clinical Recordings",
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            description = "Used for ongoing medical visit recordings"
         }
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(channel)
     }
 
     override fun onDestroy() {

@@ -8,9 +8,7 @@ plugins {
 
 android {
     namespace = "com.matheus.clinicianvisitrecorder"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.matheus.clinicianvisitrecorder"
@@ -35,10 +33,11 @@ android {
             )
         }
     }
-}
 
-kotlin {
-    jvmToolchain(11)
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 }
 
 dependencies {
