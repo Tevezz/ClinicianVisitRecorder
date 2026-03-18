@@ -1,3 +1,4 @@
+package com.matheus.clinicianvisitrecorder.data.model
 
 import com.matheus.clinicianvisitrecorder.domain.model.Patient
 import kotlinx.serialization.Serializable
