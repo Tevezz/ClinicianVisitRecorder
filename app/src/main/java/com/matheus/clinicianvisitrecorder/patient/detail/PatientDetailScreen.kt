@@ -1,0 +1,308 @@
+package com.matheus.clinicianvisitrecorder.patient.detail
+
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MicNone
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.matheus.clinicianvisitrecorder.domain.model.Patient
+
+@Composable
+fun PatientDetailScreen(
+    patientId: String,
+    viewModel: PatientDetailViewModel = hiltViewModel<PatientDetailViewModel, PatientDetailViewModel.Factory> { factory ->
+        factory.create(patientId)
+    }
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.handleIntent(PatientDetailIntent.StartVisit)
+        } else {
+            // TODO Handle denial Show a "Why we need this" snackbar
+        }
+    }
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background
+    ) { padding ->
+        when (state.visitStatus) {
+            VisitStatus.Active -> ActiveVisitContent(state, viewModel, Modifier.padding(padding))
+            else -> IdleVisitContent(state, Modifier.padding(padding)) {
+                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            }
+        }
+    }
+}
+
+@Composable
+fun IdleVisitContent(state: PatientDetailUiState, modifier: Modifier = Modifier, onStartClick: () -> Unit) {
+    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
+
+        // Use the existing Header Card from the screenshot
+        PatientHeaderCard(state.patient, isActive = false)
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // State 1 Main Card: Preparation
+        Card(
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, Color(0xFF30363D))
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp).fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                // A subtle icon indicating readiness
+                Icon(
+                    imageVector = Icons.Default.MicNone,
+                    contentDescription = null,
+                    tint = Color.Gray,
+                    modifier = Modifier.size(64.dp)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Medical Visit Preparation",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color.White
+                )
+
+                Text(
+                    text = "Review patient data above. When ready, tap 'Start' to begin the clinical recording and live transcription.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // State 1 Action: The Start Button
+        Button(
+            onClick = onStartClick,
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(
+                "Start Medical Visit",
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White
+            )
+        }
+    }
+}
+
+@Composable
+fun ActiveVisitContent(state: PatientDetailUiState, viewModel: PatientDetailViewModel, modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
+
+        // State 2: Header Card showing "Active" pill (Screenshot Top)
+        PatientHeaderCard(state.patient, isActive = true)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // State 2 Main Card: The Waveform (Screenshot Middle)
+        Card(
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, Color(0xFF30363D))
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Recording Indicator: "● REC"
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(modifier = Modifier.size(8.dp), shape = CircleShape, color = MaterialTheme.colorScheme.error) {}
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("REC", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Placeholder for Waveform component (We can animate this in KMP)
+                WaveformPlaceholder()
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // The Duration Timer (Screenshot "16:39")
+                Text(
+                    text = state.recordingDuration,
+                    style = MaterialTheme.typography.displayMedium,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text("Recording in progress...", color = Color.Gray, style = MaterialTheme.typography.bodyMedium)
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // State 2 Transcript Card (Screenshot Bottom)
+        TranscriptCard(transcript = state.transcript)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Stop button (Senior design choice: Make it standard height, red)
+        Button(
+            onClick = { viewModel.handleIntent(PatientDetailIntent.StopVisit) },
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text("Stop Recording", color = Color.White)
+        }
+    }
+}
+
+@Composable
+fun PatientHeaderCard(
+    patient: Patient?,
+    isActive: Boolean
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF161B22)),
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(1.dp, Color(0xFF30363D))
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = patient?.name ?: "Loading...",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+                Text("DOB: 08/22/1948", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                Text("SOC Visit", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                Text("Sunrise Home Health", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+            }
+
+            if (isActive) {
+                Surface(
+                    color = Color(0xFF238636).copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, Color(0xFF238636))
+                ) {
+                    Text(
+                        text = "Active",
+                        color = Color(0xFF4ADE80),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WaveformPlaceholder() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val barCount = 15
+        val purpleColor = Color(0xFF9F7AEA)
+
+        repeat(barCount) { index ->
+            // Simulate random heights for a "live" look
+            val heightPercent = when (index % 5) {
+                0 -> 0.4f; 1 -> 0.8f; 2 -> 1.0f; 3 -> 0.7f; else -> 0.5f
+            }
+
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 3.dp)
+                    .width(6.dp)
+                    .fillMaxHeight(heightPercent)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(purpleColor)
+            )
+        }
+    }
+}
+
+@Composable
+fun TranscriptCard(transcript: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF0D1117)),
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(1.dp, Color(0xFF30363D))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "Live Transcript",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = if (transcript.isEmpty()) "\"...waiting for speech...\"" else "\"$transcript\"",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.White,
+                fontStyle = FontStyle.Italic
+            )
+        }
+    }
+}

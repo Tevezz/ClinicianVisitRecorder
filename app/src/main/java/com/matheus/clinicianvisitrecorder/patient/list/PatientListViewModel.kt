@@ -1,4 +1,4 @@
-package com.matheus.clinicianvisitrecorder.patient
+package com.matheus.clinicianvisitrecorder.patient.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

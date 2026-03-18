@@ -4,12 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.MaterialTheme
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.matheus.clinicianvisitrecorder.navigation.Route
-import com.matheus.clinicianvisitrecorder.patient.PatientListScreen
+import com.matheus.clinicianvisitrecorder.patient.detail.PatientDetailScreen
+import com.matheus.clinicianvisitrecorder.patient.list.PatientListScreen
+import com.matheus.clinicianvisitrecorder.ui.theme.ClinicianVisitRecorderTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -20,7 +21,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            MaterialTheme {
+            ClinicianVisitRecorderTheme {
+
                 val backStack = rememberNavBackStack(Route.PatientList)
 
                 NavDisplay(
@@ -36,11 +38,11 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
-//                        entry<Route.PatientDetail> {
-//                            PatientListScreen(
-//                                onNavigateDetail = { /* No-op */ }
-//                            )
-//                        }
+                        entry<Route.PatientDetail> { key ->
+                            PatientDetailScreen(
+                                patientId = key.patientId
+                            )
+                        }
                     }
                 )
             }

@@ -1,4 +1,4 @@
-package com.matheus.clinicianvisitrecorder.patient
+package com.matheus.clinicianvisitrecorder.patient.list
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -24,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.matheus.clinicianvisitrecorder.domain.model.Patient
@@ -41,9 +40,9 @@ fun PatientCard(
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF161B22) // Slightly lighter than the background
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        border = BorderStroke(1.dp, Color(0xFF30363D)) // Subtle "Senior" touch for depth
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Row(
             modifier = Modifier
@@ -55,13 +54,13 @@ fun PatientCard(
             Surface(
                 modifier = Modifier.size(48.dp),
                 shape = CircleShape,
-                color = Color(0xFF21262D)
+                color = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
                         text = patient.name.take(1).uppercase(),
                         style = MaterialTheme.typography.titleMedium,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -72,7 +71,7 @@ fun PatientCard(
                 Text(
                     text = patient.name,
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -82,7 +81,7 @@ fun PatientCard(
                 Text(
                     text = patient.condition,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -92,7 +91,7 @@ fun PatientCard(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = Color(0xFF8B949E),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(20.dp)
             )
         }

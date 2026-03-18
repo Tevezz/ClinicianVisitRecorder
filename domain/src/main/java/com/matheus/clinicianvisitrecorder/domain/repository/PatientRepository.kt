@@ -6,4 +6,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface PatientRepository {
     fun getPatients(): Flow<PagingData<Patient>>
+    fun getPatientById(id: String): Flow<Patient?>
 }

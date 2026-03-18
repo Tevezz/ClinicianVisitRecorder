@@ -1,4 +1,4 @@
-package com.matheus.clinicianvisitrecorder.patient
+package com.matheus.clinicianvisitrecorder.patient.list
 
 sealed interface PatientListIntent {
     object Refresh : PatientListIntent

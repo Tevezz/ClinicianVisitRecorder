@@ -1,4 +1,4 @@
-package com.matheus.clinicianvisitrecorder.patient
+package com.matheus.clinicianvisitrecorder.patient.list
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,9 +18,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -38,11 +38,11 @@ fun PatientListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(state.title, color = Color.White) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF0D1117))
+                title = { Text(state.title, color = MaterialTheme.colorScheme.onBackground) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },
-        containerColor = Color(0xFF0D1117) // Nestmed Dark Theme
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
 
@@ -50,7 +50,7 @@ fun PatientListScreen(
             if (patients.loadState.refresh is LoadState.Loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
-                    color = Color.Cyan
+                    color = MaterialTheme.colorScheme.primary
                 )
             } else {
                 LazyColumn(
@@ -78,7 +78,7 @@ fun PatientListScreen(
                                     .fillMaxWidth()
                                     .padding(16.dp)
                                     .wrapContentWidth(Alignment.CenterHorizontally),
-                                color = Color.Cyan
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }

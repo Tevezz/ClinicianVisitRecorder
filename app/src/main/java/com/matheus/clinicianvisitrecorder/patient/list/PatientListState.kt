@@ -1,4 +1,4 @@
-package com.matheus.clinicianvisitrecorder.patient
+package com.matheus.clinicianvisitrecorder.patient.list
 
 data class PatientListState(
     val title: String = "My Patients",
