@@ -48,7 +48,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -100,7 +99,13 @@ fun PatientDetailScreen(
                 state = state,
                 modifier = Modifier.padding(padding),
                 onStartClick = { permissionLauncher.launch(Manifest.permission.RECORD_AUDIO) },
-                onPlayClick = { path -> viewModel.playRecording(path) }
+                onPlayClick = { path ->
+                    viewModel.handleIntent(
+                        PatientDetailIntent.PlayRecording(
+                            path
+                        )
+                    )
+                }
             )
         }
     }
@@ -132,7 +137,10 @@ fun IdleVisitContent(
         ) {
             Icon(Icons.Default.Mic, contentDescription = null)
             Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.start_new_visit), style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(R.string.start_new_visit),
+                style = MaterialTheme.typography.titleMedium
+            )
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -178,11 +186,11 @@ fun ActiveVisitContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = state.recordingDuration, // e.g., "04:20"
+                text = state.recordingDuration,
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            WaveformPlaceholder()
+            Waveform()
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -238,8 +246,8 @@ fun PatientHeaderCard(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 val statusColor = when (patient?.condition?.lowercase()) {
-                    "alive" -> Color(0xFF4ADE80)
-                    "dead" -> Color(0xFFEF4444)
+                    "alive" -> MaterialTheme.colorScheme.onSecondary
+                    "dead" -> MaterialTheme.colorScheme.error
                     else -> MaterialTheme.colorScheme.onSurfaceVariant
                 }
                 Text(
@@ -285,13 +293,46 @@ fun PatientHeaderCard(
 }
 
 @Composable
-fun WaveformPlaceholder() {
+fun Waveform() {
     val purpleColor = MaterialTheme.colorScheme.primary
     val infiniteTransition = rememberInfiniteTransition(label = "waveform")
 
-    val initialHeights = listOf(0.3f, 0.7f, 0.5f, 0.9f, 0.2f, 0.8f, 0.4f, 1.0f, 0.5f, 0.6f, 0.3f, 0.9f, 0.6f, 0.4f, 0.7f)
-    val targetHeights  = listOf(0.9f, 0.3f, 1.0f, 0.4f, 0.8f, 0.2f, 0.9f, 0.3f, 1.0f, 0.2f, 0.8f, 0.4f, 0.9f, 0.8f, 0.3f)
-    val durations      = listOf( 420,  600,  350,  500,  460,  650,  380,  520,  480,  600,  430,  560,  490,  580,  370)
+    val initialHeights = listOf(
+        0.3f,
+        0.7f,
+        0.5f,
+        0.9f,
+        0.2f,
+        0.8f,
+        0.4f,
+        1.0f,
+        0.5f,
+        0.6f,
+        0.3f,
+        0.9f,
+        0.6f,
+        0.4f,
+        0.7f
+    )
+    val targetHeights = listOf(
+        0.9f,
+        0.3f,
+        1.0f,
+        0.4f,
+        0.8f,
+        0.2f,
+        0.9f,
+        0.3f,
+        1.0f,
+        0.2f,
+        0.8f,
+        0.4f,
+        0.9f,
+        0.8f,
+        0.3f
+    )
+    val durations =
+        listOf(420, 600, 350, 500, 460, 650, 380, 520, 480, 600, 430, 560, 490, 580, 370)
 
     val animatedHeights = initialHeights.indices.map { i ->
         infiniteTransition.animateFloat(
@@ -427,7 +468,7 @@ fun VisitItem(visit: Visit, onPlayClick: (String) -> Unit) {
         ) {
             Icon(
                 imageVector = Icons.Default.PlayCircle,
-                contentDescription = "Play",
+                contentDescription = stringResource(R.string.play),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .size(40.dp)

@@ -25,6 +25,12 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class RecordingService : Service() {
 
+    companion object {
+        const val ACTION_START = "ACTION_START"
+        const val ACTION_STOP = "ACTION_STOP"
+        const val EXTRA_PATIENT_ID = "PATIENT_ID"
+    }
+
     @Inject
     lateinit var visitRepository: VisitRepository
 
@@ -38,14 +44,14 @@ class RecordingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            "ACTION_START" -> {
-                val id = intent.getStringExtra("PATIENT_ID") ?: "unknown"
+            ACTION_START -> {
+                val id = intent.getStringExtra(EXTRA_PATIENT_ID) ?: "unknown"
                 currentPatientId = id
                 startTime = System.currentTimeMillis()
                 startRecording(id)
             }
 
-            "ACTION_STOP" -> stopRecording()
+            ACTION_STOP -> stopRecording()
         }
         return START_STICKY
     }

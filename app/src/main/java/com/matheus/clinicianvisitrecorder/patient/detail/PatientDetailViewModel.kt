@@ -49,6 +49,7 @@ class PatientDetailViewModel @AssistedInject constructor(
         when (intent) {
             is PatientDetailIntent.StartVisit -> startRecording()
             is PatientDetailIntent.StopVisit -> stopRecording()
+            is PatientDetailIntent.PlayRecording -> playRecording(intent.filePath)
         }
     }
 
@@ -71,7 +72,7 @@ class PatientDetailViewModel @AssistedInject constructor(
         }
     }
 
-    fun playRecording(filePath: String) {
+    private fun playRecording(filePath: String) {
         try {
             mediaPlayer?.release()
             mediaPlayer = MediaPlayer().apply {
@@ -86,8 +87,8 @@ class PatientDetailViewModel @AssistedInject constructor(
 
     private fun startRecording() {
         val intent = Intent(context, RecordingService::class.java).apply {
-            action = "ACTION_START"
-            putExtra("PATIENT_ID", patientId)
+            action = RecordingService.ACTION_START
+            putExtra(RecordingService.EXTRA_PATIENT_ID, patientId)
         }
 
         ContextCompat.startForegroundService(context, intent)
@@ -96,7 +97,7 @@ class PatientDetailViewModel @AssistedInject constructor(
             it.copy(
                 visitStatus = PatientDetailVisitStatus.Active,
                 recordingDuration = "00:00",
-                transcript = "Waiting for audio..."
+                transcript = ""
             )
         }
 
@@ -105,7 +106,7 @@ class PatientDetailViewModel @AssistedInject constructor(
 
     private fun stopRecording() {
         val intent = Intent(context, RecordingService::class.java).apply {
-            action = "ACTION_STOP"
+            action = RecordingService.ACTION_STOP
         }
         context.startService(intent)
         timerJob?.cancel()
