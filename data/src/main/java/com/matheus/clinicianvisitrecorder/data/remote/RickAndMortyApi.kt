@@ -1,7 +1,7 @@
 package com.matheus.clinicianvisitrecorder.data.remote
 
-import com.matheus.clinicianvisitrecorder.data.model.CharacterDto
-import com.matheus.clinicianvisitrecorder.data.model.CharacterResponseDto
+import CharacterDto
+import CharacterResponseDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get

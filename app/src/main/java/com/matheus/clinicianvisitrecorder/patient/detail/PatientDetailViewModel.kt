@@ -95,7 +95,7 @@ class PatientDetailViewModel @AssistedInject constructor(
 
         _uiState.update {
             it.copy(
-                visitStatus = VisitStatus.Active,
+                visitStatus = PatientDetailVisitStatus.Active,
                 recordingDuration = "00:00",
                 transcript = "Waiting for audio..."
             )
@@ -110,7 +110,7 @@ class PatientDetailViewModel @AssistedInject constructor(
         }
         context.startService(intent)
         timerJob?.cancel()
-        _uiState.update { it.copy(visitStatus = VisitStatus.Idle) }
+        _uiState.update { it.copy(visitStatus = PatientDetailVisitStatus.Idle) }
     }
 
     // Temporary Timer Logic for the MVP

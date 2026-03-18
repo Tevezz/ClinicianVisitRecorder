@@ -4,7 +4,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.matheus.clinicianvisitrecorder.data.datasource.PatientDataSource
-import com.matheus.clinicianvisitrecorder.data.model.toPatient
 import com.matheus.clinicianvisitrecorder.data.remote.RickAndMortyApi
 import com.matheus.clinicianvisitrecorder.domain.model.Patient
 import com.matheus.clinicianvisitrecorder.domain.repository.PatientRepository
@@ -12,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import toPatient
 import javax.inject.Inject
 
 internal class PatientRepositoryImpl @Inject constructor(

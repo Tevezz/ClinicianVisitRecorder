@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
@@ -41,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -48,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
 import com.matheus.clinicianvisitrecorder.domain.model.Patient
 import com.matheus.clinicianvisitrecorder.domain.model.Visit
 import java.time.Instant
@@ -80,7 +83,7 @@ fun PatientDetailScreen(
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         when (state.visitStatus) {
-            VisitStatus.Active -> ActiveVisitContent(
+            PatientDetailVisitStatus.Active -> ActiveVisitContent(
                 state = state,
                 modifier = Modifier.padding(padding),
                 onStopClick = { viewModel.handleIntent(PatientDetailIntent.StopVisit) }
@@ -234,26 +237,57 @@ fun PatientHeaderCard(
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            AsyncImage(
+                model = patient?.profileImageUrl,
+                contentDescription = patient?.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(72.dp)
+                    .clip(CircleShape)
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = patient?.name ?: "Loading...",
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleLarge,
                     color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                val statusColor = when (patient?.condition?.lowercase()) {
+                    "alive" -> Color(0xFF4ADE80)
+                    "dead" -> Color(0xFFEF4444)
+                    else -> Color.Gray
+                }
                 Text(
-                    "DOB: 08/22/1948",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.bodySmall
+                    text = patient?.condition ?: "",
+                    color = statusColor,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold
                 )
-                Text("SOC Visit", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
-                Text(
-                    "Sunrise Home Health",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.bodySmall
-                )
+
+                if (patient?.species?.isNotEmpty() == true) {
+                    Text(
+                        text = patient.species,
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                if (patient?.location?.isNotEmpty() == true) {
+                    Text(
+                        text = patient.location,
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
 
             if (isActive) {

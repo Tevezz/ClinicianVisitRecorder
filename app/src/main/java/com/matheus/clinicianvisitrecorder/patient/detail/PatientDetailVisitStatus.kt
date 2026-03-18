@@ -1,6 +1,6 @@
 package com.matheus.clinicianvisitrecorder.patient.detail
 
-enum class VisitStatus {
+enum class PatientDetailVisitStatus {
     Idle,
     Active,
     Processing
