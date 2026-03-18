@@ -10,17 +10,40 @@ import android.os.Build
 import android.os.Environment
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import com.matheus.clinicianvisitrecorder.domain.model.Visit
+import com.matheus.clinicianvisitrecorder.domain.repository.VisitRepository
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class RecordingService : Service() {
 
+    @Inject
+    lateinit var visitRepository: VisitRepository
+
     private var mediaRecorder: MediaRecorder? = null
-    private val channelId = "recording_channel"
+    private var currentPatientId: String? = null
+    private var startTime: Long = 0L
     private var outputFile: File? = null
+
+    private val channelId = "recording_channel"
+    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            "ACTION_START" -> startRecording(intent.getStringExtra("PATIENT_ID") ?: "unknown")
+            "ACTION_START" -> {
+                val id = intent.getStringExtra("PATIENT_ID") ?: "unknown"
+                currentPatientId = id
+                startTime = System.currentTimeMillis()
+                startRecording(id)
+            }
             "ACTION_STOP" -> stopRecording()
         }
         return START_STICKY
@@ -29,50 +52,102 @@ class RecordingService : Service() {
     private fun startRecording(patientId: String) {
         createNotificationChannel()
 
-        // 1. Create the File
         val fileName = "visit_${patientId}_${System.currentTimeMillis()}.mp3"
         outputFile = File(getExternalFilesDir(Environment.DIRECTORY_MUSIC), fileName)
 
-        // 2. Setup Notification (Required for Foreground)
+        // SmallIcon is MANDATORY for foreground services
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("Visit Recording Active")
             .setContentText("Recording encounter for Patient $patientId")
+            .setSmallIcon(android.R.drawable.ic_btn_speak_now) // Use a system icon for now
             .setOngoing(true)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .build()
 
         startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
 
-        // 3. Setup MediaRecorder
-        mediaRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            MediaRecorder(this)
-        } else {
-            MediaRecorder()
-        }.apply {
-            setAudioSource(MediaRecorder.AudioSource.MIC)
-            setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-            setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-            setOutputFile(outputFile?.absolutePath)
-            prepare()
-            start()
+        try {
+            mediaRecorder = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                MediaRecorder(this)
+            } else {
+                MediaRecorder()
+            }).apply {
+                setAudioSource(MediaRecorder.AudioSource.MIC)
+                setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                setOutputFile(outputFile?.absolutePath)
+                prepare()
+                start()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            stopSelf() // Fail fast if hardware mic is unavailable
         }
     }
 
     private fun stopRecording() {
+        val patientId = currentPatientId ?: "unknown"
+        val duration = calculateDuration()
+        val finalPath = outputFile?.absolutePath
+
         mediaRecorder?.apply {
-            stop()
-            release()
+            try {
+                stop()
+            } catch (e: IllegalStateException) {
+                // Occurs if stop() is called before start() completes
+            } finally {
+                release()
+            }
         }
         mediaRecorder = null
-        stopForeground(STOP_FOREGROUND_REMOVE)
-        stopSelf()
 
-        // TODO: Broadcast 'outputFile?.absolutePath' to ViewModel or Database
+        serviceScope.launch {
+            if (finalPath != null) {
+                visitRepository.saveVisit(
+                    Visit(
+                        patientId = patientId,
+                        filePath = finalPath,
+                        timestamp = System.currentTimeMillis(),
+                        duration = duration
+                    )
+                )
+            }
+
+            withContext(Dispatchers.Main) {
+                // Reset internal state
+                startTime = 0L
+                currentPatientId = null
+                stopForeground(STOP_FOREGROUND_REMOVE)
+                stopSelf()
+            }
+        }
+    }
+
+    private fun calculateDuration(): String {
+        if (startTime == 0L) return "00:00"
+        val elapsedMillis = System.currentTimeMillis() - startTime
+        val seconds = (elapsedMillis / 1000) % 60
+        val minutes = (elapsedMillis / (1000 * 60)) % 60
+        return String.format("%02d:%02d", minutes, seconds)
     }
 
     private fun createNotificationChannel() {
-        val channel =
-            NotificationChannel(channelId, "Recordings", NotificationManager.IMPORTANCE_LOW)
-        getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                channelId,
+                "Clinical Recordings",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Used for ongoing medical visit recordings"
+            }
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        serviceScope.cancel()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

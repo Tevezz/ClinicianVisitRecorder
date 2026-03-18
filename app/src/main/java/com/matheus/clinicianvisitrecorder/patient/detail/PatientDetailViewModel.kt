@@ -2,10 +2,12 @@ package com.matheus.clinicianvisitrecorder.patient.detail
 
 import android.content.Context
 import android.content.Intent
+import android.media.MediaPlayer
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.matheus.clinicianvisitrecorder.domain.usecase.GetPatientByIdUseCase
+import com.matheus.clinicianvisitrecorder.domain.usecase.GetVisitsUseCase
 import com.matheus.clinicianvisitrecorder.service.RecordingService
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -24,7 +26,8 @@ import kotlinx.coroutines.launch
 class PatientDetailViewModel @AssistedInject constructor(
     @Assisted private val patientId: String,
     @ApplicationContext private val context: Context,
-    private val getPatientByIdUseCase: GetPatientByIdUseCase
+    private val getPatientByIdUseCase: GetPatientByIdUseCase,
+    private val getVisitsUseCase: GetVisitsUseCase
 ) : ViewModel() {
 
     @AssistedFactory
@@ -32,11 +35,14 @@ class PatientDetailViewModel @AssistedInject constructor(
         fun create(patientId: String): PatientDetailViewModel
     }
 
+    private var mediaPlayer: MediaPlayer? = null
+
     private val _uiState = MutableStateFlow(PatientDetailUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
         loadPatient()
+        loadVisits()
     }
 
     fun handleIntent(intent: PatientDetailIntent) {
@@ -55,6 +61,27 @@ class PatientDetailViewModel @AssistedInject constructor(
                     it.copy(patient = patient, isLoading = false)
                 }
             }
+        }
+    }
+
+    private fun loadVisits() {
+        viewModelScope.launch {
+            getVisitsUseCase(patientId).collect { visitList ->
+                _uiState.update { it.copy(visits = visitList) }
+            }
+        }
+    }
+
+    fun playRecording(filePath: String) {
+        try {
+            mediaPlayer?.release()
+            mediaPlayer = MediaPlayer().apply {
+                setDataSource(filePath)
+                prepare()
+                start()
+            }
+        } catch (e: Exception) {
+            // Handle file not found or corrupted
         }
     }
 
@@ -102,5 +129,11 @@ class PatientDetailViewModel @AssistedInject constructor(
                 }
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 }
