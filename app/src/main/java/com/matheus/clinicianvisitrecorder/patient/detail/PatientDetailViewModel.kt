@@ -2,8 +2,8 @@ package com.matheus.clinicianvisitrecorder.patient.detail
 
 import android.content.Context
 import android.content.Intent
-import android.media.MediaPlayer
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.matheus.clinicianvisitrecorder.domain.usecase.GetPatientByIdUseCase
@@ -34,8 +34,6 @@ class PatientDetailViewModel @AssistedInject constructor(
     interface Factory {
         fun create(patientId: String): PatientDetailViewModel
     }
-
-    private var mediaPlayer: MediaPlayer? = null
 
     private val _uiState = MutableStateFlow(PatientDetailUiState())
     val uiState = _uiState.asStateFlow()
@@ -73,16 +71,17 @@ class PatientDetailViewModel @AssistedInject constructor(
     }
 
     private fun playRecording(filePath: String) {
-        try {
-            mediaPlayer?.release()
-            mediaPlayer = MediaPlayer().apply {
-                setDataSource(filePath)
-                prepare()
-                start()
-            }
-        } catch (e: Exception) {
-
+        val file = java.io.File(filePath)
+        val uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            file
+        )
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, "audio/*")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
         }
+        context.startActivity(intent)
     }
 
     private fun startRecording() {
@@ -131,9 +130,4 @@ class PatientDetailViewModel @AssistedInject constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        mediaPlayer?.release()
-        mediaPlayer = null
-    }
 }
